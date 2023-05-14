@@ -1,0 +1,28 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon --exec babel-node src/index.js"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "express-validator": "^7.0.1",
+    "jsonwebtoken": "^9.0.0",
+    "morgan": "^1.10.0",
+    "mssql": "^9.1.1",
+    "multer": "^1.4.5-lts.1",
+    "socket.io": "^4.6.1"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.21.5",
+    "@babel/core": "^7.21.8",
+    "@babel/node": "^7.20.7",
+    "@babel/preset-env": "^7.21.5",
+    "nodemon": "^2.0.22"
+  }
+}

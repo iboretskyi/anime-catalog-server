@@ -1,0 +1,91 @@
+@hostname = http://localhost:3003
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTY4NDA5MjQxOCwiZXhwIjoxNjg0MDk2MDE4fQ.rTNCldmjvLS0JaKy_DaQRqjc6Ocd0wUXtUsLom6IccY
+
+###
+
+GET {{hostname}}/user/get-user
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+
+PUT {{hostname}}/user/add-to-library
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "animeId": 2,
+  "status": "Watching"
+}
+
+###
+
+PUT {{hostname}}/user/follow-user
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "targetUserId": 2
+}
+
+###
+
+PUT {{hostname}}/user/unfollow-user
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "targetUserId": 2
+}
+
+###
+
+POST {{hostname}}/user/post-reaction
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "animeId": 1,
+  "reactionMessage": "I love this anime!"
+}
+
+###
+
+PUT {{hostname}}/user/put-reaction
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "reactionId": 1,
+  "reactionMessage": "I changed my mind, this anime is just okay."
+}
+
+###
+
+DELETE {{hostname}}/user/delete-reaction
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "reactionId": 1
+}
+
+###
+
+PUT {{hostname}}/user/upvote
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "reactionId": 1
+}
+
+###
+
+PUT {{hostname}}/user/un-upvote
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "reactionId": 1
+}

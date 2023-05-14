@@ -1,0 +1,29 @@
+@hostname = http://localhost:3003
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTY4NDAwNTEyMywiZXhwIjoxNjg0MDA4NzIzfQ.z2hHt6COrGF9qn6oeckKrBvN2c7V6S7hYzKLzsz85jc
+
+###
+
+POST {{hostname}}/admin/post-anime
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "title": "Neon Genesis Evangelion",
+  "description": "In the year 2015, the world stands on the brink of destruction. Humanity's last hope lies in the hands of NERV, a special agency under the United Nations, and their Evangelions, giant machines capable of defeating the Angels who herald Earth's ruin.",
+  "genre": "Sci-Fi, Psychological, Drama, Mecha",
+  "imageUrl": "/path/to/neon-genesis-evangelion.jpg"
+}
+
+###
+
+PUT {{hostname}}/admin/put-anime
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "animeId": 25,
+  "title": "Updated Anime Title",
+  "description": "Updated Anime Description",
+  "genre": "Updated, Anime, Genre",
+  "imageUrl": "/path/to/new/image.jpg"
+}

@@ -1,0 +1,30 @@
+### 
+# Get home without limit and status = all
+GET http://localhost:3003/get-home/no-limit/all
+Content-Type: application/json
+###
+
+
+### 
+# Get home with limit = 10 and status = 'top airing anime'
+GET http://localhost:3003/get-home/5/most%20popular%20anime
+Content-Type: application/json
+###
+
+### 
+# Get specific anime with id = 1
+GET http://localhost:3003/get-each-anime/1
+Content-Type: application/json
+###
+
+### 
+# Get specific reaction with id = 1
+GET http://localhost:3003/get-each-reaction/1
+Content-Type: application/json
+###
+
+### 
+# Get other user with id = 1
+GET http://localhost:3003/get-other-user/1
+Content-Type: application/json
+###
