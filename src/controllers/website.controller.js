@@ -37,35 +37,46 @@ export const getEachAnime = async (req, res, next) => {
   try {
     const pool = await getConnection();
 
-    // Fetch anime with genres
-    const result = await pool.request()
+    // Fetch anime details
+    const animeResult = await pool.request()
       .input('animeId', sql.Int, animeId)
       .query(`
         SELECT 
-          Anime.*, 
-          Genre.name AS genreName
+          Anime.* 
         FROM Anime 
-        LEFT JOIN AnimeGenre ON Anime.id = AnimeGenre.animeId 
-        LEFT JOIN Genre ON AnimeGenre.genreId = Genre.id
         WHERE Anime.id = @animeId
       `);
-    
-    if (!result.recordset[0]) {
+
+    if (!animeResult.recordset[0]) {
       const err = new Error('Not a valid URL');
-      err.statusCode(404);
+      err.statusCode = 404;
       throw err;
     }
 
-    // Group genres together
-    const anime = result.recordset.reduce((acc, curr) => {
-      if (!acc.id) {
-        acc = { ...curr, genres: [] };
-      }
-      if (curr.genreName) {
-        acc.genres.push(curr.genreName);
-      }
-      return acc;
-    }, {});
+    // Fetch genres
+    const genresResult = await pool.request()
+      .input('animeId', sql.Int, animeId)
+      .query(`
+        SELECT 
+          Genre.name AS genreName
+        FROM AnimeGenre 
+        LEFT JOIN Genre ON AnimeGenre.genreId = Genre.id
+        WHERE AnimeGenre.animeId = @animeId
+      `);
+
+    // Fetch reactions
+    const reactionsResult = await pool.request()
+      .input('animeId', sql.Int, animeId)
+      .query(`
+        SELECT 
+          Reaction.* 
+        FROM Reaction 
+        WHERE Reaction.animeId = @animeId
+      `);
+
+    const anime = animeResult.recordset[0];
+    anime.genres = genresResult.recordset.map(g => g.genreName);
+    anime.reactions = reactionsResult.recordset;
 
     const message = 'Fetched anime from DB successfully';
     res.status(200).json({ message: message, anime: anime });
@@ -99,15 +110,72 @@ export const getOtherUser = async (req, res, next) => {
   const userId = req.params.userId;
   try {
     const pool = await getConnection();
+
+    // Get user
     const result = await pool.request()
       .input('userId', sql.Int, userId)
-      .query('SELECT * FROM User WHERE id = @userId');
+      .query('SELECT * FROM [User] WHERE id = @userId');
     const user = result.recordset[0];
     if (!user) throw new Error('no user found');
+
+    // Get followers
+    const followers = await pool
+      .request()
+      .input('userId', sql.Int, userId)
+      .query(`
+        SELECT U.id, U.username 
+        FROM UserFollowers UF
+        INNER JOIN [User] U ON UF.followerId = U.id
+        WHERE UF.userId = @userId
+      `);
+
+    // Get followings
+    const followings = await pool
+      .request()
+      .input('userId', sql.Int, userId)
+      .query(`
+        SELECT U.id, U.username 
+        FROM UserFollowing UF
+        INNER JOIN [User] U ON UF.followingId = U.id
+        WHERE UF.userId = @userId
+      `);
+
+    // Get reactions
+    const reactions = await pool
+      .request()
+      .input('userId', sql.Int, userId)
+      .query(`
+        SELECT Reaction.*, Anime.title AS animeTitle, Anime.imageUrl AS animeImageUrl, [User].username AS reactedByUsername
+        FROM UserReactions 
+        INNER JOIN Reaction ON UserReactions.reactionId = Reaction.id
+        INNER JOIN Anime ON Reaction.animeId = Anime.id
+        INNER JOIN [User] ON Reaction.userId = [User].id
+        WHERE UserReactions.userId = @userId
+      `);
+
+    // Get anime list
+    const animeList = await pool
+      .request()
+      .input('userId', sql.Int, userId)
+      .query(`
+        SELECT AnimeList.*, Anime.title, Anime.imageUrl 
+        FROM AnimeList 
+        INNER JOIN Anime ON AnimeList.animeId = Anime.id 
+        WHERE AnimeList.userId = @userId
+      `);
+
     const message = 'fetched user successfully';
     res.status(200).json({
       message: message,
-      user: user, // You'll need to manually join related data such as AnimeList, UserFollowing, etc.
+      user: {
+        _id: user.id,
+        username: user.username,
+        role: user.role,
+        followers: followers.recordset,
+        followings: followings.recordset,
+        reactions: reactions.recordset,
+        animeList: animeList.recordset,
+      },
     });
   } catch (err) {
     errorHandler(err, next);

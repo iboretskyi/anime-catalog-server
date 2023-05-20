@@ -29,21 +29,47 @@ export const postAnime = async (req, res, next) => {
     err.statusCode = 403;
     return next(err);
   }
-  // const imageUrl = '/' + req.file.path;
-  const { title, description, genre, imageUrl } = req.body;
+
+  const { title, description, genre: genreString } = req.body;
+  const genre = genreString.split(',');
+
+  let filePath = req.file.path; // Full file path
+  let imageUrl = `/${path.join('images', path.basename(filePath))}`; // This is the relative path
+
   try {
     const pool = await getConnection();
-    await pool.request()
+    
+    // Insert into Anime table and get the inserted id
+    const animeResult = await pool.request()
       .input('title', sql.VarChar, title)
       .input('description', sql.VarChar, description)
       .input('score', sql.Decimal(3, 2), 9.99)
-      .input('genre', sql.VarChar, genre)
       .input('imageUrl', sql.VarChar, imageUrl)
-      .query('INSERT INTO Anime (title, description, score, genre, imageUrl) VALUES (@title, @description, @score, @genre, @imageUrl)');
-    const message = 'added new anime to the db';
-    console.log(message);
-    res.status(201).json({ message: message });
+      .query('INSERT INTO Anime (title, description, score, imageUrl) OUTPUT INSERTED.id VALUES (@title, @description, @score, @imageUrl)');
+    
+    const animeId = animeResult.recordset[0].id;
+
+    // Insert into AnimeGenre table
+    await Promise.all(genre.map(async (genreName) => {
+      const genreResult = await pool.request()
+        .input('name', sql.VarChar, genreName.trim())
+        .query('SELECT id FROM Genre WHERE name = @name');
+
+      if (genreResult.recordset.length > 0) {
+        const genreId = genreResult.recordset[0].id;
+        await pool.request()
+          .input('animeId', sql.Int, animeId)
+          .input('genreId', sql.Int, genreId)
+          .query('INSERT INTO AnimeGenre (animeId, genreId) VALUES (@animeId, @genreId)');
+      }
+    }));
+
+    const message = 'Added new anime to the database';
+    res.status(201).json({ message: message, imageUrl: imageUrl }); // send the imageUrl back to the client
   } catch (err) {
+    if (req.file) {
+      clearImage(imageUrl); // delete the new image file if there was an error
+    }
     errorHandler(err, next);
   }
 };

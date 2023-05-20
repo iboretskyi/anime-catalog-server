@@ -70,8 +70,8 @@ export const login = async (req, res, next) => {
       {
         userId: user.id,
       },
-      'secret-my-kitsu',
-      { expiresIn: '1h' }
+      'secret-my-catalog',
+      { expiresIn: '3h' }
     );
     const message = 'logged in successfully';
     res.status(200).json({ token: token, message: message });

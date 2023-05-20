@@ -57,13 +57,23 @@ export const getUser = async (req, res, next) => {
     const followers = await pool
       .request()
       .input('userId', sql.Int, req.userId)
-      .query('SELECT * FROM UserFollowers WHERE userId = @userId');
+      .query(`
+        SELECT U.id, U.username 
+        FROM UserFollowers UF
+        INNER JOIN [User] U ON UF.followerId = U.id
+        WHERE UF.userId = @userId
+      `);
 
     // Get followings
     const followings = await pool
       .request()
       .input('userId', sql.Int, req.userId)
-      .query('SELECT * FROM UserFollowing WHERE userId = @userId');
+      .query(`
+        SELECT U.id, U.username 
+        FROM UserFollowing UF
+        INNER JOIN [User] U ON UF.followingId = U.id
+        WHERE UF.userId = @userId
+      `);
 
     // Get reactions
     const reactions = await pool
