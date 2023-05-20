@@ -1,5 +1,5 @@
 @hostname = http://localhost:3003
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTY4NDA5MjQxOCwiZXhwIjoxNjg0MDk2MDE4fQ.rTNCldmjvLS0JaKy_DaQRqjc6Ocd0wUXtUsLom6IccY
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTY4NDU2OTcwMCwiZXhwIjoxNjg0NTczMzAwfQ.NGYcFdakWVbos8w_Wg3zZtdB3UQA2SFvgOBtRYRAsP8
 
 ###
 
@@ -67,7 +67,7 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "reactionId": 1
+  "reactionId": 2
 }
 
 ###

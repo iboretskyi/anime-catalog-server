@@ -200,9 +200,9 @@ export const deleteReaction = async (req, res, next) => {
       .input('reactionId', sql.Int, reactionId)
       .input('userId', sql.Int, req.userId)
       .query(`
-        DELETE FROM Reaction WHERE id = @reactionId;
         DELETE FROM UserReactions 
         WHERE reactionId = @reactionId AND userId = @userId;
+        DELETE FROM Reaction WHERE id = @reactionId;
       `);
     const message = 'deleted reaction successfully';
     res.status(200).json({ message: message });
