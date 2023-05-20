@@ -44,14 +44,14 @@ export const getUser = async (req, res, next) => {
 
     // Get anime list
     const animeList = await pool
-      .request()
-      .input('userId', sql.Int, req.userId)
-      .query(`
-        SELECT AnimeList.*, Anime.imageUrl 
-        FROM AnimeList 
-        INNER JOIN Anime ON AnimeList.animeId = Anime.id 
-        WHERE AnimeList.userId = @userId
-      `);
+    .request()
+    .input('userId', sql.Int, req.userId)
+    .query(`
+      SELECT AnimeList.*, Anime.title, Anime.imageUrl 
+      FROM AnimeList 
+      INNER JOIN Anime ON AnimeList.animeId = Anime.id 
+      WHERE AnimeList.userId = @userId
+    `);
 
     // Get followers
     const followers = await pool

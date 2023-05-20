@@ -1,6 +1,7 @@
 import { validationResult } from 'express-validator';
 import { getConnection, sql } from '../database';
 import { errorHandler, clearImage } from '../helper';
+import path from 'path';
 
 export const isAdmin = async (req, res, next) => {
   try {
@@ -55,33 +56,46 @@ export const putAnime = async (req, res, next) => {
     err.statusCode = 403;
     return next(err);
   }
-  const imageUrl = req.file ? '/' + req.file.path : null;
-  const { title, description, genre, animeId } = req.body;
+
+  const { title, description, genre: genreString, animeId } = req.body;
+  const genre = genreString.split(',');
+  const filePath = req.file.path;
+  const imageUrl = `/${path.join('images', path.basename(filePath))}`;
+
   try {
     const pool = await getConnection();
-    const result = await pool.request()
-      .input('animeId', sql.Int, animeId)
-      .query('SELECT * FROM Anime WHERE id = @animeId');
-    const anime = result.recordset[0];
-    if (!anime) {
-      const err = new Error('invalid anime id');
-      err.statusCode = 404;
-      throw err;
-    }
-    if (imageUrl) {
-      clearImage(anime.imageUrl);
-      anime.imageUrl = imageUrl;
-    }
+
     await pool.request()
-      .input('title', sql.VarChar, title || anime.title)
-      .input('description', sql.VarChar, description || anime.description)
-      .input('genre', sql.VarChar, genre ? genre : anime.genre)
-      .input('imageUrl', sql.VarChar, anime.imageUrl)
+      .input('title', sql.VarChar, title)
+      .input('description', sql.VarChar, description)
+      .input('score', sql.Decimal(3, 2), 9.99)
+      .input('imageUrl', sql.VarChar, imageUrl)
       .input('animeId', sql.Int, animeId)
-      .query('UPDATE Anime SET title = @title, description = @description, genre = @genre, imageUrl = @imageUrl WHERE id = @animeId');
-    const message = 'updated anime successfully';
-    res.status(200).json({ message: message });
+      .query('UPDATE Anime SET title=@title, description=@description, score=@score, imageUrl=@imageUrl WHERE id=@animeId');
+
+    await pool.request()
+      .input('animeId', sql.Int, animeId)
+      .query('DELETE FROM AnimeGenre WHERE animeId=@animeId');
+
+    await Promise.all(genre.map(async (genreName) => {
+      const genreResult = await pool.request()
+        .input('name', sql.VarChar, genreName.trim())
+        .query('SELECT id FROM Genre WHERE name = @name');
+
+      if (genreResult.recordset.length > 0) {
+        const genreId = genreResult.recordset[0].id;
+        await pool.request()
+          .input('animeId', sql.Int, animeId)
+          .input('genreId', sql.Int, genreId)
+          .query('INSERT INTO AnimeGenre (animeId, genreId) VALUES (@animeId, @genreId)');
+      }
+    }));
+
+    res.status(200).json({ message: 'Updated anime record in the database', imageUrl: imageUrl });
   } catch (err) {
+    if (req.file) {
+      clearImage(imageUrl);
+    }
     errorHandler(err, next);
   }
 };

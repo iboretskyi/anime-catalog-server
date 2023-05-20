@@ -15,7 +15,7 @@ import websiteRoutes from './routes/website.routes';
 const app = express();
 
 const fileStorage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, 'images'),
+  destination: (req, file, cb) => cb(null, `${__dirname}\\images`),
   filename: (req, file, cb) => cb(null, file.originalname),
 });
 
@@ -46,32 +46,23 @@ app.use(express.urlencoded());
 app.use(
   multer({ storage: fileStorage, fileFilter: fileFilter }).single('image')
 );
-app.use('/images', express.static(path.join(__dirname, 'images')));
-
 app.use(cors(corsOptions));
 
-
+app.use('/images', express.static(path.join(__dirname, 'images')));
 app.use('/admin', adminRoutes);
 app.use('/auth', authRoutes);
 app.use('/user', userRoutes);
 app.use(websiteRoutes);
 
-app.use((req, res, next) => {
-  console.log('req.body', req.body);
-  next();
-});
-
 // app.use((req, res, next) => {
-//   const err = new Error('invalid url');
-//   err.statusCode = 404;
-//   next(err);
+//   console.log(`${__dirname}/images`)
+//   console.log('req.body', req.body);
+//   next();
 // });
 
+
 // app.use((err, req, res, next) => {
-//   console.log(err.message);
-//   const message = err.message;
-//   const data = err.data;
-//   res.status(err.statusCode).json({ message: message, data: data });
+//   console.log(req.body);
 // });
 
 export default app;
