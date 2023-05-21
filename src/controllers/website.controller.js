@@ -69,8 +69,9 @@ export const getEachAnime = async (req, res, next) => {
       .input('animeId', sql.Int, animeId)
       .query(`
         SELECT 
-          Reaction.* 
+          Reaction.*, [User].username 
         FROM Reaction 
+        INNER JOIN [User] ON Reaction.userId = [User].id
         WHERE Reaction.animeId = @animeId
       `);
 
