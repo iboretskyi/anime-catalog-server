@@ -54,15 +54,4 @@ app.use('/auth', authRoutes);
 app.use('/user', userRoutes);
 app.use(websiteRoutes);
 
-// app.use((req, res, next) => {
-//   console.log(`${__dirname}/images`)
-//   console.log('req.body', req.body);
-//   next();
-// });
-
-
-// app.use((err, req, res, next) => {
-//   console.log(req.body);
-// });
-
 export default app;
